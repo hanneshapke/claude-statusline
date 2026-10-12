@@ -50,4 +50,17 @@ The installer backs up your existing `settings.json` to `settings.json.bak.pre-s
 
 ## Customize
 
-Edit `~/.claude/statusline.py`. Each segment is a few lines appending to `parts1` or `parts2`; delete the ones you don't want. Changes apply on the next refresh without restarting Claude Code.
+Edit `~/.claude/statusline.py`. The file is organized as:
+
+- **Theme** constants at the top: colors, bar width, warning thresholds, truncation lengths.
+- **Segment functions** named `seg_*`, each taking a `Session` and returning a string, or `None` to hide itself.
+- **`SEGMENTS`**, an ordered list near the bottom. Remove, reorder, or add entries to change what the bar shows.
+
+To add a segment, write a function and append it to `SEGMENTS`:
+
+```python
+def seg_version(s: Session) -> Optional[str]:
+    return dim(f"v{s.get('version')}") if s.has("version") else None
+```
+
+`Session.get("a.b.c")` and `Session.num("a.b.c")` are null-safe dotted lookups into the JSON Claude Code sends, documented at https://code.claude.com/docs/en/statusline. A segment that raises is skipped rather than blanking the whole bar. Changes apply on the next refresh without restarting Claude Code.
